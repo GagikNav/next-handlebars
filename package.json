@@ -5,13 +5,12 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-
   "repository": {
     "type": "git",
     "url": "https://github.com/GagikNav/next-handlebars"
   },
   "scripts": {
-    "build": "tsup"
+    "build": "tsup --target es5"
   },
   "keywords": [
     "next",
@@ -20,6 +19,7 @@
   "author": "gagik_n",
   "license": "MIT",
   "devDependencies": {
+    "@swc/core": "^1.9.3",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2"
   }
