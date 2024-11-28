@@ -1,7 +1,7 @@
 {
   "name": "next-handlebars",
   "description": "Next.js with Handlebars",
-  "version": "0.0.1-development",
+  "version": "0.0.1-development-2",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
