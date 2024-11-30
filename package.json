@@ -16,11 +16,18 @@
     "next",
     "handlebars"
   ],
-  "author": "gagik_n",
+  "author": "Gagik Navasatariyan",
   "license": "MIT",
   "devDependencies": {
     "@swc/core": "^1.9.3",
+    "@types/graceful-fs": "^4.1.9",
+    "@types/node": "^22.10.1",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "glob": "^11.0.0",
+    "graceful-fs": "^4.2.11",
+    "handlebars": "^4.7.8"
   }
 }
