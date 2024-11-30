@@ -1,4 +1,4 @@
-import type { PlaceHolderProps } from './types'
+import type { PlaceHolderProps } from '../types'
 
 export const placeholder = ({ firstName, lastName, age }: PlaceHolderProps): string => {
   console.log('This is a placeholder function')
