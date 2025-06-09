@@ -79,6 +79,10 @@ export interface ConfigOptions {
 	helpers?: UnknownObject;
 	compilerOptions?: CompileOptions;
 	runtimeOptions?: Handlebars.RuntimeOptions;
+	settings?: {
+		views?: string|string[];
+		
+	},
 }
 
 export interface EngineOptions extends ConfigOptions {
