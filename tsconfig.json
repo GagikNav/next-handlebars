@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
+    "module": "es2022", // or "esnext", "node16", "node18", "nodenext"
+    "target": "es2022",
+    "moduleResolution": "node",
     "declaration": true,
     "outDir": "./dist",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "target": "ES2015",
     "sourceMap": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
     "allowSyntheticDefaultImports": true
   },
   "include": ["src"],
