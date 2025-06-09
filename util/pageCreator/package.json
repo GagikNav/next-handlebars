@@ -1,0 +1,14 @@
+{
+  "name": "pagecreator",
+  "version": "0.0.0-alfa-1",
+  "description": "A CLI tool that generates a predefined file and folder structure.",
+  "main": "cli.js",
+  "bin": {
+    "mycli": "./cli.js"
+  },
+  "scripts": {
+    "start": "node cli.js"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
