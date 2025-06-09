@@ -1,12 +1,33 @@
-/node_modules
+# Source and development files
 /src
 /test
+/example
+/coverage
+/.github
 
-.env
-.DS_Store
-.vscode
-
-
+# Build tools and configs
 tsconfig.json
 tsup.config.ts
+jest.config.js
+.eslintrc.json
+.prettierrc.json
+.prettierignore
+
+# Environment and system files
+.env
+.env.local
+.DS_Store
+.vscode
+*.log
+
+# Dependencies
+/node_modules
+
+# Documentation (keep essential ones)
+CONTRIBUTING.md
+SECURITY.md
+
+# Git
+.git
+.gitignore
 
