@@ -1,28 +1,84 @@
 {
   "name": "next-handlebars",
-  "description": "Next.js with Handlebars",
+  "description": "A powerful Handlebars templating engine integration for Next.js, providing server-side template rendering with layouts, partials, and helpers support.",
   "version": "0.0.1-development-2",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/GagikNav/next-handlebars"
+    "url": "https://github.com/GagikNav/next-handlebars.git"
   },
+  "bugs": {
+    "url": "https://github.com/GagikNav/next-handlebars/issues"
+  },
+  "homepage": "https://github.com/GagikNav/next-handlebars#readme",
   "scripts": {
     "build": "tsup --target es5",
-    "clean": "rm -rf dist node_modules package-lock.json"
+    "build:watch": "tsup --watch",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist node_modules package-lock.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,json,md}\"",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "prepublishOnly": "npm run clean && npm run build && npm run test",
+    "example:dev": "cd example && npm run dev",
+    "example:build": "cd example && npm run build"
   },
   "keywords": [
     "next",
-    "handlebars"
+    "nextjs",
+    "handlebars",
+    "templating",
+    "template-engine",
+    "server-side-rendering",
+    "ssr",
+    "layouts",
+    "partials",
+    "helpers",
+    "express-handlebars",
+    "typescript"
   ],
-  "author": "Gagik Navasatariyan",
+  "author": "Gagik Navasatariyan (https://github.com/GagikNav)",
   "license": "MIT",
+  "peerDependencies": {
+    "next": ">=15.0.0",
+    "react": ">=19.0.0"
+  },
   "devDependencies": {
     "@swc/core": "^1.11.31",
     "@types/graceful-fs": "^4.1.9",
+    "@types/handlebars": "^4.1.0",
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.15.30",
+    "@typescript-eslint/eslint-plugin": "^8.33.1",
+    "@typescript-eslint/parser": "^8.33.1",
+    "eslint": "^9.28.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.3.4",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"
   },
