@@ -1,7 +1,5 @@
 import NextHandlebars from "./next-handlebars";
 
-
-
 import type {
   ConfigOptions,
 } from "../types";
@@ -12,4 +10,5 @@ export function create (config: ConfigOptions = {}): NextHandlebars {
   return new NextHandlebars(config);
 }
 
-export * from './place-holder-function'
+// Re-export types for convenience
+export type * from "../types";

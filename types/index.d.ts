@@ -1,14 +1,5 @@
 /// <reference types="handlebars" />
 
-
-export type PlaceHolderProps = {
-  firstName: string
-  lastName?: string
-  age?: number
-}
-
-
-
 export interface UnknownObject {
 	[index: string]: unknown
 }
