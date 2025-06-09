@@ -10,7 +10,8 @@
     "url": "https://github.com/GagikNav/next-handlebars"
   },
   "scripts": {
-    "build": "tsup --target es5"
+    "build": "tsup --target es5",
+    "clean": "rm -rf dist node_modules package-lock.json"
   },
   "keywords": [
     "next",
@@ -19,14 +20,14 @@
   "author": "Gagik Navasatariyan",
   "license": "MIT",
   "devDependencies": {
-    "@swc/core": "^1.9.3",
+    "@swc/core": "^1.11.31",
     "@types/graceful-fs": "^4.1.9",
-    "@types/node": "^22.10.1",
-    "tsup": "^8.3.5",
-    "typescript": "^5.7.2"
+    "@types/node": "^22.15.30",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "glob": "^11.0.0",
+    "glob": "^11.0.2",
     "graceful-fs": "^4.2.11",
     "handlebars": "^4.7.8"
   }
