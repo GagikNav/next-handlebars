@@ -9,31 +9,31 @@
  */
 
 import Handlebars from 'handlebars/dist/handlebars.js';
-import * as fs from "graceful-fs";
-import * as path from "node:path";
-import { promisify } from "node:util";
-import { glob } from "glob";
+import * as fs from 'graceful-fs';
+import * as path from 'node:path';
+import { promisify } from 'node:util';
+import { glob } from 'glob';
 import type {
-	UnknownObject,
-	HelperDelegateObject,
-	ConfigOptions,
-	Engine,
-	TemplateSpecificationObject,
-	TemplateDelegateObject,
-	FsCache,
-	PartialTemplateOptions,
-	PartialsDirObject,
-	RenderOptions,
-	RenderViewOptions,
-	RenderCallback,
-	HandlebarsImport,
-	CompiledCache,
-	PrecompiledCache,
-	RenameFunction,
-} from "../types";
+  UnknownObject,
+  HelperDelegateObject,
+  ConfigOptions,
+  Engine,
+  TemplateSpecificationObject,
+  TemplateDelegateObject,
+  FsCache,
+  PartialTemplateOptions,
+  PartialsDirObject,
+  RenderOptions,
+  RenderViewOptions,
+  RenderCallback,
+  HandlebarsImport,
+  CompiledCache,
+  PrecompiledCache,
+  RenameFunction,
+} from '../types';
 
-import { fileURLToPath } from 'node:url'
-import { readdir } from 'fs/promises'
+import { fileURLToPath } from 'node:url';
+import { readdir } from 'fs/promises';
 const readFile = promisify(fs.readFile);
 
 // -----------------------------------------------------------------------------
@@ -50,7 +50,6 @@ const defaultConfig: ConfigOptions = {
   runtimeOptions: undefined,
 };
 
-
 /**
  * Finds the "app" folder in the project and returns a list of all subfolders
  * that contain a "route.tsx" file. It checks both the presence and absence of a "src" folder.
@@ -58,25 +57,27 @@ const defaultConfig: ConfigOptions = {
  * @returns A promise that resolves to an array of subfolder names containing "route.tsx".
  */
 export async function findAppSubfoldersWithRouteTsx(): Promise<string[]> {
-  const appDirs = ['app', 'src/app']
-  const result: string[] = []
+  const appDirs = ['app', 'src/app'];
+  const result: string[] = [];
 
   for (const appDir of appDirs) {
-    const fullPath = path.resolve(appDir)
+    const fullPath = path.resolve(appDir);
     if (fs.existsSync(fullPath)) {
-      const entries = await fs.promises.readdir(fullPath, { withFileTypes: true })
+      const entries = await fs.promises.readdir(fullPath, {
+        withFileTypes: true,
+      });
       for (const entry of entries) {
         if (entry.isDirectory()) {
-          const routeFile = path.join(fullPath, entry.name, 'route.tsx')
+          const routeFile = path.join(fullPath, entry.name, 'route.tsx');
           if (fs.existsSync(routeFile)) {
-            result.push(entry.name)
+            result.push(entry.name);
           }
         }
       }
     }
   }
 
-  return result
+  return result;
 }
 /**
  * A class that provides Handlebars template rendering capabilities with Next.js integration.
@@ -125,42 +126,42 @@ export async function findAppSubfoldersWithRouteTsx(): Promise<string[]> {
  * @property {HandlebarsImport} handlebars - Handlebars instance
  */
 export default class NextHandlebars {
-  config: ConfigOptions
-  engine: Engine
-  encoding: BufferEncoding
-  layoutsDir: string
-  extname: string
-  compiled: CompiledCache
-  precompiled: PrecompiledCache
-  _fsCache: FsCache
-  partialsDir: string | PartialsDirObject | (string | PartialsDirObject)[]
-  compilerOptions: CompileOptions
-  runtimeOptions: RuntimeOptions
-  helpers: HelperDelegateObject
-  defaultLayout: string
-  handlebars: HandlebarsImport
+  config: ConfigOptions;
+  engine: Engine;
+  encoding: BufferEncoding;
+  layoutsDir: string;
+  extname: string;
+  compiled: CompiledCache;
+  precompiled: PrecompiledCache;
+  _fsCache: FsCache;
+  partialsDir: string | PartialsDirObject | (string | PartialsDirObject)[];
+  compilerOptions: CompileOptions;
+  runtimeOptions: RuntimeOptions;
+  helpers: HelperDelegateObject;
+  defaultLayout: string;
+  handlebars: HandlebarsImport;
 
   constructor(config: ConfigOptions = {}) {
     // Config properties with defaults.
-    Object.assign(this, defaultConfig, config)
+    Object.assign(this, defaultConfig, config);
 
     // save given config to override other settings.
-    this.config = config
+    this.config = config;
 
     // Express view engine integration point.
-    this.engine = this.renderView.bind(this)
+    this.engine = this.renderView.bind(this);
 
     // Normalize `extname`.
     if (this.extname.charAt(0) !== '.') {
-      this.extname = '.' + this.extname
+      this.extname = '.' + this.extname;
     }
 
     // Internal caches of compiled and precompiled templates.
-    this.compiled = {}
-    this.precompiled = {}
+    this.compiled = {};
+    this.precompiled = {};
 
     // Private internal file system cache.
-    this._fsCache = {}
+    this._fsCache = {};
   }
 
   // This method retrieves all partial templates.
@@ -191,15 +192,17 @@ export default class NextHandlebars {
    * ```
    */
   async getPartials(
-    options: PartialTemplateOptions = {},
+    options: PartialTemplateOptions = {}
   ): Promise<TemplateSpecificationObject | TemplateDelegateObject> {
     // If no partials directory is defined, return an empty object.
     if (typeof this.partialsDir === 'undefined') {
-      return {}
+      return {};
     }
 
     // Ensure partialsDir is an array for consistent processing.
-    const partialsDirs = Array.isArray(this.partialsDir) ? this.partialsDir : [this.partialsDir]
+    const partialsDirs = Array.isArray(this.partialsDir)
+      ? this.partialsDir
+      : [this.partialsDir];
 
     // Process each partials directory.
     /**
@@ -219,58 +222,62 @@ export default class NextHandlebars {
      */
     const dirs = await Promise.all(
       partialsDirs.map(async (dir) => {
-        let dirPath: string
-        let dirTemplates: TemplateDelegateObject
-        let dirNamespace: string
-        let dirRename: RenameFunction
+        let dirPath: string;
+        let dirTemplates: TemplateDelegateObject;
+        let dirNamespace: string;
+        let dirRename: RenameFunction;
 
         // Handle different types of partialsDir entries.
         if (typeof dir === 'string') {
-          dirPath = dir
+          dirPath = dir;
         } else if (typeof dir === 'object') {
-          dirTemplates = dir.templates
-          dirNamespace = dir.namespace
-          dirRename = dir.rename
-          dirPath = dir.dir
+          dirTemplates = dir.templates;
+          dirNamespace = dir.namespace;
+          dirRename = dir.rename;
+          dirPath = dir.dir;
         }
 
         // Ensure we have a path to templates or the templates themselves.
         if (!dirPath && !dirTemplates) {
-          throw new Error('A partials dir must be a string or config object')
+          throw new Error('A partials dir must be a string or config object');
         }
 
         // Retrieve templates from the directory if not provided directly.
         const templates: HandlebarsTemplateDelegate | TemplateSpecification =
-          dirTemplates || (await this.getTemplates(dirPath, options))
+          dirTemplates || (await this.getTemplates(dirPath, options));
 
         return {
-          templates: templates as HandlebarsTemplateDelegate | TemplateSpecification,
+          templates: templates as
+            | HandlebarsTemplateDelegate
+            | TemplateSpecification,
           namespace: dirNamespace,
           rename: dirRename,
-        }
-      }),
-    )
+        };
+      })
+    );
 
     // Initialize an object to hold all partial templates.
-    const partials: TemplateDelegateObject | TemplateSpecificationObject = {}
+    const partials: TemplateDelegateObject | TemplateSpecificationObject = {};
 
     // Process each directory's templates.
     for (const dir of dirs) {
-      const { templates, namespace, rename } = dir
-      const filePaths = Object.keys(templates)
+      const { templates, namespace, rename } = dir;
+      const filePaths = Object.keys(templates);
 
       // Determine the function to get template names.
       const getTemplateNameFn =
-        typeof rename === 'function' ? rename : this._getTemplateName.bind(this)
+        typeof rename === 'function'
+          ? rename
+          : this._getTemplateName.bind(this);
 
       // Map each file path to its corresponding template.
       for (const filePath of filePaths) {
-        const partialName = getTemplateNameFn(filePath, namespace)
-        partials[partialName] = templates[filePath]
+        const partialName = getTemplateNameFn(filePath, namespace);
+        partials[partialName] = templates[filePath];
       }
     }
 
-    return partials
+    return partials;
   }
 
   /**
@@ -294,39 +301,41 @@ export default class NextHandlebars {
    */
   async getTemplate(
     filePath: string,
-    options: PartialTemplateOptions = {},
+    options: PartialTemplateOptions = {}
   ): Promise<HandlebarsTemplateDelegate | TemplateSpecification> {
-    filePath = path.resolve(filePath)
+    filePath = path.resolve(filePath);
 
-    const encoding = options.encoding || this.encoding
+    const encoding = options.encoding || this.encoding;
     const cache: PrecompiledCache | CompiledCache = options.precompiled
       ? this.precompiled
-      : this.compiled
-    const template: Promise<HandlebarsTemplateDelegate | TemplateSpecification> =
-      options.cache && cache[filePath]
+      : this.compiled;
+    const template: Promise<
+      HandlebarsTemplateDelegate | TemplateSpecification
+    > = options.cache && cache[filePath];
 
     if (template) {
-      return template
+      return template;
     }
 
     // Optimistically cache template promise to reduce file system I/O, but
     // remove from cache if there was a problem.
     try {
-      cache[filePath] = this._getFile(filePath, { cache: options.cache, encoding }).then(
-        (file: string) => {
-          const compileTemplate: (
-            file: string,
-            options: RuntimeOptions,
-          ) => TemplateSpecification | HandlebarsTemplateDelegate = (
-            options.precompiled ? this._precompileTemplate : this._compileTemplate
-          ).bind(this)
-          return compileTemplate(file, this.compilerOptions)
-        },
-      )
-      return await cache[filePath]
+      cache[filePath] = this._getFile(filePath, {
+        cache: options.cache,
+        encoding,
+      }).then((file: string) => {
+        const compileTemplate: (
+          file: string,
+          options: RuntimeOptions
+        ) => TemplateSpecification | HandlebarsTemplateDelegate = (
+          options.precompiled ? this._precompileTemplate : this._compileTemplate
+        ).bind(this);
+        return compileTemplate(file, this.compilerOptions);
+      });
+      return await cache[filePath];
     } catch (err) {
-      delete cache[filePath]
-      throw err
+      delete cache[filePath];
+      throw err;
     }
   }
 
@@ -350,31 +359,31 @@ export default class NextHandlebars {
    */
   async getTemplates(
     dirPath: string, // Directory path to load templates from
-    options: PartialTemplateOptions = {}, // Options for template loading
+    options: PartialTemplateOptions = {} // Options for template loading
   ): Promise<HandlebarsTemplateDelegate | TemplateSpecification> {
     // Get cache setting from options
-    const cache = options.cache
+    const cache = options.cache;
 
     // Get array of template file paths in the directory
-    const filePaths = await this._getDir(dirPath, { cache })
+    const filePaths = await this._getDir(dirPath, { cache });
 
     // Load and compile all templates in parallel
     const templates = await Promise.all(
       filePaths.map((filePath) => {
         // Join directory path with file path and get compiled template
-        return this.getTemplate(path.join(dirPath, filePath), options)
-      }),
-    )
+        return this.getTemplate(path.join(dirPath, filePath), options);
+      })
+    );
 
     // Create hash map of file paths to compiled templates
-    const hash = {}
+    const hash = {};
     for (let i = 0; i < filePaths.length; i++) {
       // Map each file path to its corresponding compiled template
-      hash[filePaths[i]] = templates[i]
+      hash[filePaths[i]] = templates[i];
     }
 
     // Return map of all compiled templates
-    return hash
+    return hash;
   }
 
   /**
@@ -400,10 +409,10 @@ export default class NextHandlebars {
   async render(
     filePath: string, // Path to the template file
     context: UnknownObject = {}, // Data context to render into template
-    options: RenderOptions = {}, // Rendering configuration options
+    options: RenderOptions = {} // Rendering configuration options
   ): Promise<string> {
     // Get character encoding, fallback to instance default
-    const encoding = options.encoding || this.encoding
+    const encoding = options.encoding || this.encoding;
 
     // Load template and partials in parallel for better performance
     const [template, partials] = await Promise.all([
@@ -415,14 +424,23 @@ export default class NextHandlebars {
 
       // Get partials either from options or from instance partials directory
       (options.partials ||
-        this.getPartials({ cache: options.cache, encoding })) as Promise<TemplateDelegateObject>,
-    ])
+        this.getPartials({
+          cache: options.cache,
+          encoding,
+        })) as Promise<TemplateDelegateObject>,
+    ]);
 
     // Merge instance-level and render-level helpers
-    const helpers: HelperDelegateObject = { ...this.helpers, ...options.helpers }
+    const helpers: HelperDelegateObject = {
+      ...this.helpers,
+      ...options.helpers,
+    };
 
     // Merge instance-level and render-level runtime options
-    const runtimeOptions = { ...this.runtimeOptions, ...options.runtimeOptions }
+    const runtimeOptions = {
+      ...this.runtimeOptions,
+      ...options.runtimeOptions,
+    };
 
     // Setup data channel for templates and helpers
     // Includes NextHandlebars metadata under @exphbs namespace
@@ -435,7 +453,7 @@ export default class NextHandlebars {
         partials, // All available partials
         runtimeOptions, // Runtime configuration
       },
-    }
+    };
 
     // Render template with context and all configurations
     const html = this._renderTemplate(template, context, {
@@ -443,19 +461,22 @@ export default class NextHandlebars {
       data, // Data channel for @data references
       helpers, // Helper functions
       partials, // Partial templates
-    })
+    });
 
-    return html
+    return html;
   }
 
-  async renderView(viewPath: string): Promise<string>
-  async renderView(viewPath: string, options: RenderViewOptions): Promise<string>
-  async renderView(viewPath: string, callback: RenderCallback): Promise<null>
+  async renderView(viewPath: string): Promise<string>;
+  async renderView(
+    viewPath: string,
+    options: RenderViewOptions
+  ): Promise<string>;
+  async renderView(viewPath: string, callback: RenderCallback): Promise<null>;
   async renderView(
     viewPath: string,
     options: RenderViewOptions,
-    callback: RenderCallback,
-  ): Promise<null>
+    callback: RenderCallback
+  ): Promise<null>;
   /**
    * Renders a view with the given options and callback.
    *
@@ -492,55 +513,60 @@ export default class NextHandlebars {
   async renderView(
     viewPath: string, // Path to the view template
     options: RenderViewOptions | RenderCallback = {}, // Rendering options or callback
-    callback: RenderCallback | null = null, // Optional callback function
+    callback: RenderCallback | null = null // Optional callback function
   ): Promise<string | null> {
     // Handle case where options is actually the callback
     if (typeof options === 'function') {
-      callback = options
-      options = {}
+      callback = options;
+      options = {};
     }
 
     // Cast options to UnknownObject for context data
-    const context = options as UnknownObject
+    const context = options as UnknownObject;
 
     // Setup promise-based handling if no callback provided
-    let promise: Promise<string> | null = null
+    let promise: Promise<string> | null = null;
     if (!callback) {
       promise = new Promise((resolve, reject) => {
         callback = (err, value) => {
           if (err !== null) {
-            reject(err)
+            reject(err);
           } else {
-            resolve(value)
+            resolve(value);
           }
-        }
-      })
+        };
+      });
     }
 
     // Handle Express.js view resolution
     // Express provides view settings which we use to locate templates
-    let view: string
-    const views = options.settings && options.settings.views
-    const viewsPath = this._resolveViewsPath(views, viewPath)
+    let view: string;
+    const views = options.settings && options.settings.views;
+    const viewsPath = this._resolveViewsPath(views, viewPath);
     if (viewsPath) {
       // Calculate relative path for template name
-      view = this._getTemplateName(path.relative(viewsPath, viewPath))
+      view = this._getTemplateName(path.relative(viewsPath, viewPath));
       // Set partials and layouts directories relative to views path
-      this.partialsDir = this.config.partialsDir || path.join(viewsPath, 'partials/')
-      this.layoutsDir = this.config.layoutsDir || path.join(viewsPath, 'layouts/')
+      this.partialsDir =
+        this.config.partialsDir || path.join(viewsPath, 'partials/');
+      this.layoutsDir =
+        this.config.layoutsDir || path.join(viewsPath, 'layouts/');
     }
 
     // Get template encoding from options or use instance default
-    const encoding = options.encoding || this.encoding
+    const encoding = options.encoding || this.encoding;
 
     // Merge helpers: instance-level helpers and render-specific helpers
-    const helpers = { ...this.helpers, ...options.helpers }
+    const helpers = { ...this.helpers, ...options.helpers };
 
     // Merge partials: Get all registered partials and combine with render-specific partials
     const partials: TemplateDelegateObject = {
-      ...((await this.getPartials({ cache: options.cache, encoding })) as TemplateDelegateObject),
+      ...((await this.getPartials({
+        cache: options.cache,
+        encoding,
+      })) as TemplateDelegateObject),
       ...(options.partials || {}),
-    }
+    };
 
     // Prepare final rendering options object
     const renderOptions = {
@@ -553,30 +579,30 @@ export default class NextHandlebars {
       helpers,
       partials,
       runtimeOptions: options.runtimeOptions,
-    }
+    };
 
     try {
       // First render the main template
-      let html = await this.render(viewPath, context, renderOptions)
+      let html = await this.render(viewPath, context, renderOptions);
 
       // Get layout path if layout is specified
-      const layoutPath = this._resolveLayoutPath(renderOptions.layout)
+      const layoutPath = this._resolveLayoutPath(renderOptions.layout);
 
       if (layoutPath) {
         // Render layout with main content in 'body' variable
         html = await this.render(
           layoutPath,
           { ...context, body: html }, // Pass rendered content as 'body' to layout
-          { ...renderOptions, layout: undefined }, // Prevent layout recursion
-        )
+          { ...renderOptions, layout: undefined } // Prevent layout recursion
+        );
       }
-      callback(null, html)
+      callback(null, html);
     } catch (err) {
-      callback(err)
+      callback(err);
     }
 
     // Return promise if using promise-based API
-    return promise
+    return promise;
   }
 
   /**
@@ -588,30 +614,32 @@ export default class NextHandlebars {
    *   - string[]: Array of file paths to remove from cache
    *   - function: Filter function to select which paths to remove
    */
-  resetCache(filePathsOrFilter?: string | string[] | ((template: string) => boolean)) {
+  resetCache(
+    filePathsOrFilter?: string | string[] | ((template: string) => boolean)
+  ) {
     // Array to hold all file paths that need to be removed from cache
-    let filePaths: string[] = []
+    let filePaths: string[] = [];
 
     // If no parameter provided, get all cached file paths
     if (typeof filePathsOrFilter === 'undefined') {
-      filePaths = Object.keys(this._fsCache)
+      filePaths = Object.keys(this._fsCache);
     }
     // If single string path provided, create single-item array
     else if (typeof filePathsOrFilter === 'string') {
-      filePaths = [filePathsOrFilter]
+      filePaths = [filePathsOrFilter];
     }
     // If filter function provided, apply it to all cached paths
     else if (typeof filePathsOrFilter === 'function') {
-      filePaths = Object.keys(this._fsCache).filter(filePathsOrFilter)
+      filePaths = Object.keys(this._fsCache).filter(filePathsOrFilter);
     }
     // If array of paths provided, use it directly
     else if (Array.isArray(filePathsOrFilter)) {
-      filePaths = filePathsOrFilter
+      filePaths = filePathsOrFilter;
     }
 
     // Remove each specified path from the cache
     for (const filePath of filePaths) {
-      delete this._fsCache[filePath]
+      delete this._fsCache[filePath];
     }
   }
 
@@ -626,11 +654,11 @@ export default class NextHandlebars {
    */
   protected _compileTemplate(
     template: string, // The raw template string to compile
-    options: RuntimeOptions = {}, // Optional runtime options for compilation
+    options: RuntimeOptions = {} // Optional runtime options for compilation
   ): HandlebarsTemplateDelegate {
     // Trim whitespace from template and compile using Handlebars
     // Returns a template function that can be called with context data
-    return this.handlebars.compile(template.trim(), options)
+    return this.handlebars.compile(template.trim(), options);
   }
 
   /**
@@ -643,12 +671,12 @@ export default class NextHandlebars {
    */
   protected _precompileTemplate(
     template: string, // The raw template string to precompile
-    options: RuntimeOptions = {}, // Optional runtime options for precompilation
+    options: RuntimeOptions = {} // Optional runtime options for precompilation
   ): TemplateSpecification {
     // Trim whitespace and call Handlebars precompile
     // Returns a template specification object rather than a template function
     // The specification can be used later with Handlebars.template() to create a template function
-    return this.handlebars.precompile(template.trim(), options)
+    return this.handlebars.precompile(template.trim(), options);
   }
 
   /**
@@ -662,26 +690,29 @@ export default class NextHandlebars {
   protected _renderTemplate(
     template: HandlebarsTemplateDelegate, // Compiled template function from Handlebars
     context: UnknownObject = {}, // Data context object to render into template
-    options: RuntimeOptions = {}, // Runtime options like helpers, partials etc
+    options: RuntimeOptions = {} // Runtime options like helpers, partials etc
   ): string {
     // Execute template function with context and options
     // Then trim any leading/trailing whitespace from result
-    return template(context, options).trim()
+    return template(context, options).trim();
   }
 
   // -- Private ------------------------------------------------------------------
 
-  private async _getDir(dirPath: string, options: PartialTemplateOptions = {}): Promise<string[]> {
-    dirPath = path.resolve(dirPath)
+  private async _getDir(
+    dirPath: string,
+    options: PartialTemplateOptions = {}
+  ): Promise<string[]> {
+    dirPath = path.resolve(dirPath);
 
-    const cache = this._fsCache
-    let dir = options.cache && (cache[dirPath] as Promise<string[]>)
+    const cache = this._fsCache;
+    let dir = options.cache && (cache[dirPath] as Promise<string[]>);
 
     if (dir) {
-      return [...(await dir)]
+      return [...(await dir)];
     }
 
-    const pattern = '**/*' + this.extname
+    const pattern = '**/*' + this.extname;
 
     // Optimistically cache dir promise to reduce file system I/O, but remove
     // from cache if there was a problem.
@@ -691,96 +722,102 @@ export default class NextHandlebars {
         cwd: dirPath,
         follow: true,
         posix: true,
-      })
+      });
       // @ts-expect-error FIXME: not sure how to throw error in glob for test coverage
       if (options._throwTestError) {
-        throw new Error('test')
+        throw new Error('test');
       }
 
-      return [...(await dir)]
+      return [...(await dir)];
     } catch (err) {
-      delete cache[dirPath]
-      throw err
+      delete cache[dirPath];
+      throw err;
     }
   }
 
-  private async _getFile(filePath: string, options: PartialTemplateOptions = {}): Promise<string> {
-    filePath = path.resolve(filePath)
+  private async _getFile(
+    filePath: string,
+    options: PartialTemplateOptions = {}
+  ): Promise<string> {
+    filePath = path.resolve(filePath);
 
-    const cache = this._fsCache
-    const encoding = options.encoding || this.encoding
-    const file = options.cache && (cache[filePath] as Promise<string>)
+    const cache = this._fsCache;
+    const encoding = options.encoding || this.encoding;
+    const file = options.cache && (cache[filePath] as Promise<string>);
 
     if (file) {
-      return file
+      return file;
     }
 
     // Optimistically cache file promise to reduce file system I/O, but remove
     // from cache if there was a problem.
     try {
-      cache[filePath] = readFile(filePath, { encoding: encoding || 'utf8' })
-      return (await cache[filePath]) as string
+      cache[filePath] = readFile(filePath, { encoding: encoding || 'utf8' });
+      return (await cache[filePath]) as string;
     } catch (err) {
-      delete cache[filePath]
-      throw err
+      delete cache[filePath];
+      throw err;
     }
   }
 
   private _getTemplateName(filePath: string, namespace: string = null): string {
-    let name = filePath
+    let name = filePath;
 
     if (name.endsWith(this.extname)) {
-      name = name.substring(0, name.length - this.extname.length)
+      name = name.substring(0, name.length - this.extname.length);
     }
 
     if (namespace) {
-      name = namespace + '/' + name
+      name = namespace + '/' + name;
     }
 
-    return name
+    return name;
   }
 
-  private _resolveViewsPath(views: string | string[], file: string): string | null {
+  private _resolveViewsPath(
+    views: string | string[],
+    file: string
+  ): string | null {
     if (!Array.isArray(views)) {
-      return views
+      return views;
     }
 
-    let lastDir = path.resolve(file)
-    let dir = path.dirname(lastDir)
-    const absoluteViews = views.map((v) => path.resolve(v))
+    let lastDir = path.resolve(file);
+    let dir = path.dirname(lastDir);
+    const absoluteViews = views.map((v) => path.resolve(v));
 
     // find the closest parent
     while (dir !== lastDir) {
-      const index = absoluteViews.indexOf(dir)
+      const index = absoluteViews.indexOf(dir);
       if (index >= 0) {
-        return views[index]
+        return views[index];
       }
-      lastDir = dir
-      dir = path.dirname(lastDir)
+      lastDir = dir;
+      dir = path.dirname(lastDir);
     }
 
     // cannot resolve view
-    return null
+    return null;
   }
 
   private _resolveLayoutPath(layoutPath: string): string | null {
     if (!layoutPath) {
-      return null
+      return null;
     }
 
     if (!path.extname(layoutPath)) {
-      layoutPath += this.extname
+      layoutPath += this.extname;
     }
 
-    return path.resolve(this.layoutsDir || '', layoutPath)
+    return path.resolve(this.layoutsDir || '', layoutPath);
   }
 }
 
 // Get current file's directory path
-export const currentFilePath = fileURLToPath(import.meta.url)
-export const currentDir = path.dirname(currentFilePath)
-export const scriptFolder = __dirname
-export const sourceDir = path.join(process.cwd(), 'app', '', 'hbs', 'views')
+export const currentFilePath = fileURLToPath(import.meta.url);
+export const currentDir = path.dirname(currentFilePath);
+export const scriptFolder = __dirname;
+export const sourceDir = path.join(process.cwd(), 'app', '', 'hbs', 'views');
 
 //! Continue here //
 //! Continue here //
@@ -788,26 +825,32 @@ export const sourceDir = path.join(process.cwd(), 'app', '', 'hbs', 'views')
 //! Continue here //
 // trying to find templates and partials in project folder
 export async function listFoldersInCurrentProject(): Promise<string[]> {
-  const entries = await readdir(process.cwd(), { withFileTypes: true })
-  return entries.filter((entry) => entry.isDirectory()).map((folder) => path.join(folder.name))
+  const entries = await readdir(process.cwd(), { withFileTypes: true });
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .map((folder) => path.join(folder.name));
 }
 
 export async function listFoldersWithRouteTs(): Promise<string[]> {
-  const srcDir = path.resolve('src/app')
-  console.log('srcDir', srcDir);
-  
-  const entries = await fs.promises.readdir(srcDir, { withFileTypes: true })
-  const result: string[] = []
-console.log('entries', entries);
+  const srcDir = path.resolve('./app');
+  console.log('srcDir');
+  console.dir(sourceDir, { depth: null, colors: true });
+
+  if (!fs.existsSync(srcDir)) {
+    throw new Error(`Directory does not exist: ${srcDir}`);
+  }
+  const entries = await fs.promises.readdir(srcDir, { withFileTypes: true });
+  const result: string[] = [];
+  console.log('entries', entries);
 
   for (const entry of entries) {
     if (entry.isDirectory()) {
-      const routeFile = path.join(srcDir, entry.name, 'route.ts')
+      const routeFile = path.join(srcDir, entry.name, 'route.ts');
       if (fs.existsSync(routeFile)) {
-        result.push(entry.name)
+        result.push(entry.name);
       }
     }
   }
 
-  return result
+  return result;
 }
